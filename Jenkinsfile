@@ -1,123 +1,41 @@
-def run(cmd) {
-    if (isUnix()) {
-        sh cmd
-    } else {
-        bat cmd
-    }
-}
+<!DOCTYPE html>
 
-def awsRun(cmd) {
-    withCredentials([
-        string(credentialsId: 'aws-key-id',
-               variable: 'AWS_ACCESS_KEY_ID'),
-        string(credentialsId: 'aws-key-id',
-               variable: 'AWS_SECRET_ACCESS_KEY')
-    ]) {
-        run(cmd)
-    }
-}
+<html lang="en">
 
-def ecrLogin() {
-    awsRun "aws ecr get-login-password --region ${env.REGION} | docker login --username AWS --password-stdin ${env.REGISTRY}"
-}
+<head>
 
-def deploy() {
-    awsRun "aws ssm send-command --region ${env.REGION} --instance-ids ${env.INSTANCE} --document-name AWS-RunShellScript --parameters file://deploy.json"
-}
+<meta charset="UTF-8">
 
-pipeline {
+<title>Shipped by Jenkins</title>
 
-    agent any
+<style>
 
-    environment {
-         PATH     = "C:\\Users\\baisk\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;${PATH}"
-        REGION   = 'ap-south-1'
+body{margin:0; font-family: Arial; background: #f4faf6; text-align:center}
 
-        ACCOUNT  = 'YOUR_AWS_ACCOUNT_ID'
+header {background: #135f2e;color:#fff;padding:70px 20px}
 
-        REPO     = 'hello-jenkins'
+h1{margin:0 0 12px; font-size: 44px}
 
-        INSTANCE = 'none'
+step{display:inline-block;margin: 40px 8px; padding: 20px 28px; background: #fff; border: 2px solid #1f8a44; border-radius: 12px; font-size:20px}
 
-        REGISTRY = "${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com"
+</style>
 
-        IMG      = "${REPO}:${BUILD_NUMBER}"
+</head>
 
-        REMOTE   = "${REGISTRY}/${REPO}:latest"
-    }
+<body>
 
-    stages {
+<header><h1>Hello from Jenkins Docker+ AWS</h1>
 
-        stage('Build') {
+<p>This page was built, tested and deployed automatically.</p></header>
 
-            steps {
+<div class="step">1. Jenkins builds</div>
 
-                script {
+<div class="step">2. Docker packs</div>
 
-                    run "docker build -t ${IMG} ."
+<div class="step">3. AWS runs</div>
 
-                }
-            }
-        }
+<p>Version 1 deboistech mini project</p>
 
-        stage('Test') {
+</body>
 
-            steps {
-
-                script {
-
-                    run "docker run --rm ${IMG} nginx -t"
-
-                }
-            }
-        }
-
-       stage('Push') {
-    when { expression { false } }
-    steps {
-
-                script {
-
-                    ecrLogin()
-
-                    run "docker tag ${IMG} ${REMOTE}"
-
-                    run "docker push ${REMOTE}"
-
-                }
-            }
-        }
-
-        stage('Deploy') {
-
-            when {
-
-                expression {
-                    env.INSTANCE != 'none' &&
-                    env.INSTANCE?.trim()
-                }
-
-            }
-
-            steps {
-
-                script {
-
-                    deploy()
-
-                }
-            }
-        }
-    }
-
-    post {
-
-        success {
-            echo 'Pipeline completed successfully!'
-        }
-
-        failure {
-            echo 'Pipeline failed. Check the console output.'
-        }
-    }
-}
+</html>
